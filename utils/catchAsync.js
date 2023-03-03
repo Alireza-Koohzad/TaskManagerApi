@@ -3,3 +3,6 @@ const cacthAsync = (fn) => {
     fn(req, res, next).catch(next);
   };
 };
+
+
+module.exports = cacthAsync
