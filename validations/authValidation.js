@@ -57,3 +57,17 @@ exports.loginValidation = [
     .isLength({ min: 5 })
     .withMessage("password is required and must be 5 or more characters"),
 ];
+
+
+exports.forgetValidation = [
+    check("email")
+      .not()
+      .isEmpty()
+      .isEmail()
+      .trim()
+      .normalizeEmail()
+      .withMessage("please enter valid email")
+  ];
+
+
+  
