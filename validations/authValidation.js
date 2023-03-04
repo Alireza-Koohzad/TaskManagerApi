@@ -15,7 +15,7 @@ exports.signupValidation = [
       if (user) {
         throw new Error("email is already in use!");
       }
-      return true
+      return true;
     }),
   check("password")
     .not()
@@ -51,23 +51,37 @@ exports.loginValidation = [
     .trim()
     .normalizeEmail()
     .withMessage("please enter valid email"),
-    check("password")
+  check("password")
     .not()
     .isEmpty()
     .isLength({ min: 5 })
     .withMessage("password is required and must be 5 or more characters"),
 ];
 
-
 exports.forgetValidation = [
-    check("email")
-      .not()
-      .isEmpty()
-      .isEmail()
-      .trim()
-      .normalizeEmail()
-      .withMessage("please enter valid email")
-  ];
+  check("email")
+    .not()
+    .isEmpty()
+    .isEmail()
+    .trim()
+    .normalizeEmail()
+    .withMessage("please enter valid email"),
+];
 
-
-  
+exports.resetValidation = [
+  check("password")
+    .not()
+    .isEmpty()
+    .isLength({ min: 5 })
+    .withMessage("password is required and must be 5 or more characters"),
+  check("confirmPassword")
+    .not()
+    .isEmpty()
+    .withMessage("confirmPassword is required and must be same password")
+    .custom((value, { req }) => {
+      const password = req.body.password;
+      if (value && password !== value)
+        throw new Error("Passwords must be same");
+      return true;
+    }),
+];

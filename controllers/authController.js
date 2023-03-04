@@ -5,6 +5,8 @@ const User = require("../models/userModel");
 const Api401Error = require("../utils/Api401Error");
 const { sendEmail } = require("../utils/sendEmail");
 const Api500Error = require("../utils/Api500Error");
+const Api400Error = require("../utils/Api400Error");
+const crypto = require("crypto");
 
 exports.signup = cacthAsync(async (req, res, next) => {
   //validation
@@ -70,9 +72,10 @@ exports.forgetPassword = cacthAsync(async (req, res, next) => {
   }
   //create token
   const resetToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
   const resetUrl = `${req.protocol}://${req.get(
     "host"
-  )}/api/v1/users/resetToken/${resetToken}`;
+  )}/api/v1/users/resetPassword/${resetToken}`;
   const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetUrl}.\nIf you didn't forget your password, please ignore this email!`;
   //send email
   try {
@@ -95,4 +98,43 @@ exports.forgetPassword = cacthAsync(async (req, res, next) => {
       500
     );
   }
+});
+
+exports.resetPassword = cacthAsync(async (req, res, next) => {
+  //compare input token vs password reset token in database
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new Api400Error("invalid reset token", 400));
+  }
+
+  user.password = req.body.password;
+  user.confirmPassword = req.body.confirmPassword;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpire = undefined;
+  await user.save({ validateBeforeSave: false });
+  //create token because password changed
+  const token = createSendToken(user, res);
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
+    token,
+  });
+});
+
+exports.updatePassword = cacthAsync(async (req, res, next) => {
+  //check exist user
+  //check current password in input vs password in database
+  //update password confirm password
+  // 4) Log user in, send JWT
 });
