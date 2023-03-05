@@ -85,3 +85,27 @@ exports.resetValidation = [
       return true;
     }),
 ];
+
+
+exports.updatePasswordValidation = [
+    check("currentPassword")
+      .not()
+      .isEmpty()
+      .isLength({ min: 5 })
+      .withMessage("current password is required and must be 5 or more characters"),
+      check("newPassword")
+      .not()
+      .isEmpty()
+      .isLength({ min: 5 })
+      .withMessage("new password is required and must be 5 or more characters"),
+    check("confirmPassword")
+      .not()
+      .isEmpty()
+      .withMessage("confirmPassword is required and must be same password")
+      .custom((value, { req }) => {
+        const password = req.body.newPassword;
+        if (value && password !== value)
+          throw new Error("Passwords must be same");
+        return true;
+      }),
+  ];
