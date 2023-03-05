@@ -7,6 +7,7 @@ const { sendEmail } = require("../utils/sendEmail");
 const Api500Error = require("../utils/Api500Error");
 const Api400Error = require("../utils/Api400Error");
 const crypto = require("crypto");
+const Api404Error = require("../utils/Api404Error");
 
 exports.signup = cacthAsync(async (req, res, next) => {
   //validation
@@ -101,6 +102,11 @@ exports.forgetPassword = cacthAsync(async (req, res, next) => {
 });
 
 exports.resetPassword = cacthAsync(async (req, res, next) => {
+  //validation
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   //compare input token vs password reset token in database
   const hashedToken = crypto
     .createHash("sha256")
@@ -133,8 +139,35 @@ exports.resetPassword = cacthAsync(async (req, res, next) => {
 });
 
 exports.updatePassword = cacthAsync(async (req, res, next) => {
+  //validation
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const { currentPassword, newPassword, confirmPassword } = req.body;
   //check exist user
+  const user = await User.findById(req.user.id).select("+password");
+
+  if (!user) {
+    return next(new Api404Error("user not found with this ID", 404));
+  }
   //check current password in input vs password in database
-  //update password confirm password
-  // 4) Log user in, send JWT
+  if (!(await user.comparePassword(currentPassword, user.password))) {
+    return next(new Api401Error("current password is wrong", 401));
+  }
+  //update password and confirm password
+  user.password = newPassword;
+  user.confirmPassword = confirmPassword;
+  await user.save();
+  
+
+  //Log user in, send JWT
+  const token = createSendToken(user, res);
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
+    token,
+  });
 });
