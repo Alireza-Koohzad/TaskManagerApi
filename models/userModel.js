@@ -35,6 +35,9 @@ const userSchema = new mongoose.Schema({
   passwordResetExpire: {
     type: Date,
   },
+  active :{
+    type : Boolean
+  }
 });
 
 userSchema.pre("save", async function (next) {
