@@ -1,5 +1,5 @@
 const { validationResult } = require("express-validator");
-const cacthAsync = require("../utils/catchAsync");
+const catchAsync = require("../utils/catchAsync");
 const { createSendToken } = require("../utils/jwtUtils");
 const User = require("../models/userModel");
 const Api401Error = require("../utils/Api401Error");
@@ -9,7 +9,7 @@ const Api400Error = require("../utils/Api400Error");
 const crypto = require("crypto");
 const Api404Error = require("../utils/Api404Error");
 
-exports.signup = cacthAsync(async (req, res, next) => {
+exports.signup = catchAsync(async (req, res, next) => {
   //validation
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -34,7 +34,7 @@ exports.signup = cacthAsync(async (req, res, next) => {
   });
 });
 
-exports.login = cacthAsync(async (req, res, next) => {
+exports.login = catchAsync(async (req, res, next) => {
   //validation
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -59,7 +59,7 @@ exports.login = cacthAsync(async (req, res, next) => {
   });
 });
 
-exports.forgetPassword = cacthAsync(async (req, res, next) => {
+exports.forgetPassword = catchAsync(async (req, res, next) => {
   //validation
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -101,7 +101,7 @@ exports.forgetPassword = cacthAsync(async (req, res, next) => {
   }
 });
 
-exports.resetPassword = cacthAsync(async (req, res, next) => {
+exports.resetPassword = catchAsync(async (req, res, next) => {
   //validation
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -138,7 +138,7 @@ exports.resetPassword = cacthAsync(async (req, res, next) => {
   });
 });
 
-exports.updatePassword = cacthAsync(async (req, res, next) => {
+exports.updatePassword = catchAsync(async (req, res, next) => {
   //validation
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
