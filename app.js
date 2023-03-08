@@ -27,9 +27,12 @@ db.once("open", function () {
 
 
 const userRoutes = require("./routes/userRoutes");
+const taskRoutes = require("./routes/taskRoutes");
+
 const errorController = require("./controllers/errorController");
 
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/tasks", taskRoutes);
 
 app.all("*", (req, res, next) => {
   throw new Error("این ادرس یافت نشد");
