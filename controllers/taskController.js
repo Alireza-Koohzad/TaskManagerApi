@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 const Task = require("../models/taskModel");
 const User = require("../models/userModel");
+const Api400Error = require("../utils/Api400Error");
 const Api404Error = require("../utils/Api404Error");
 const catchAsync = require("../utils/catchAsync");
 
@@ -38,10 +39,18 @@ exports.updateTask = catchAsync(async (req, res, next) => {
   }
   let data = {};
   if (req.body.text) {
+    console.log("Aeg");
     data = { ...data, text: req.body.text };
   }
-  if (req.body.completed) {
+  if (req.body.completed.toString()) {
+    console.log(typeof req.body.completed);
+    if (typeof req.body.completed != "boolean") {
+      return next(new Api400Error("this field must be boolean", 400));
+    }
     data = { ...data, completed: req.body.completed };
+  }
+  if (Object.keys(data).length === 0) {
+    return next(new Api400Error("No fields were entered to update", 400));
   }
   await Task.findByIdAndUpdate(req.params.id, data);
   res.status(200).json({
@@ -62,4 +71,3 @@ exports.deleteTask = catchAsync(async (req, res, next) => {
     message: "task deleted successfully",
   });
 });
-
