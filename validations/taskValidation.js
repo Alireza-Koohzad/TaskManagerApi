@@ -1,12 +1,7 @@
 const { check } = require("express-validator");
 
 exports.createTaskValidation = [
-    check('text')
-    .not()
-    .isEmpty()
-    .trim(),
-    check('completed')
-    .isBoolean(),
-    check('category')
-    .isArray()
-]
+  check("text", "text is required").not().isEmpty().trim(),
+  check("completed", "completed must be boolean").isBoolean(),
+  check("category", "category must be array").optional().isArray(),
+];
