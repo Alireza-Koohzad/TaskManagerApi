@@ -1,9 +1,42 @@
 const { validationResult } = require("express-validator");
+const { default: mongoose } = require("mongoose");
 const Task = require("../models/taskModel");
 const User = require("../models/userModel");
 const Api400Error = require("../utils/Api400Error");
+const Api401Error = require("../utils/Api401Error");
 const Api404Error = require("../utils/Api404Error");
+const Api500Error = require("../utils/Api500Error");
 const catchAsync = require("../utils/catchAsync");
+const index = require("../utils/indexAggregate");
+
+exports.getAllTask = catchAsync(async (req, res, next) => {
+  let query = { userId: new mongoose.Types.ObjectId(req.user.id) };
+  let sort = {};
+  sort = { ...sort, _id: -1 };
+  if (req.query.completed) {
+    console.log(req.query.completed);
+    query.completed = req.query.completed === "true";
+  }
+  const queryData = [{ $match: query }];
+
+  const aggregateData = [
+    {
+      $project: {
+        __v: 0,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    },
+  ];
+  const result = await index(req, "task", queryData, aggregateData, sort);
+  if (!result) return next(new Api500Error("interval error", 500));
+  res.status(200).json({
+    status: "success",
+    data: {
+      result,
+    },
+  });
+});
 
 exports.createTask = catchAsync(async (req, res, next) => {
   //validation
@@ -32,6 +65,19 @@ exports.createTask = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getTask = catchAsync(async (req, res, next) => {
+  const task = await Task.findById(req.params.id).select('-__v -createdAt -updatedAt');
+  if (!task) {
+    return next(new Api401Error("task not found with this ID", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    data: {
+      task,
+    },
+  });
+});
+
 exports.updateTask = catchAsync(async (req, res, next) => {
   const task = await Task.findById(req.params.id);
   if (!task) {
@@ -42,7 +88,7 @@ exports.updateTask = catchAsync(async (req, res, next) => {
     console.log("Aeg");
     data = { ...data, text: req.body.text };
   }
-  if (req.body.completed.toString()) {
+  if (req.body.completed !== undefined) {
     console.log(typeof req.body.completed);
     if (typeof req.body.completed != "boolean") {
       return next(new Api400Error("this field must be boolean", 400));
