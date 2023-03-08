@@ -8,7 +8,6 @@ const taskSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    photo: String,
     completed: {
       type: Boolean,
       default: false,
