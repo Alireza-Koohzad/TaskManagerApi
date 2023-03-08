@@ -10,9 +10,10 @@ const protect = require("../middlewares/protectMiddleware");
 const restrictTo = require("../middlewares/restrictToMiddleware");
 const { createTaskValidation } = require("../validations/taskValidation");
 
+router.use(protect);
 
-router.route("/").post(createTaskValidation , createTask);
+router.route("/").post(createTaskValidation, createTask);
 
-router.route("/:id").(patchupdateTask).delete(deleteTask);
+router.route("/:id").patch(updateTask).delete(deleteTask);
 
 module.exports = router;
