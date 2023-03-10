@@ -21,6 +21,7 @@ const {
   getAllUsers,
   getUser,
   updateMe,
+  uploadAvatar,
 } = require("../controllers/userController");
 
 router.post("/signup", signupValidation, signup);
@@ -35,11 +36,13 @@ router.patch(
   updatePasswordValidation,
   updatePassword
 );
+router.route("/avatar").patch(protect,uploadAvatar)
+
 
 // router.use(restrictTo('admin'));
 
 router.route("/").get(getAllUsers);
-
 router.route("/:id").get(getUser).patch(protect, updateMe);
+
 
 module.exports = router;
